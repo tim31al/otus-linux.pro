@@ -1,13 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV["LC_ALL"] = "en_US.UTF-8"
+
 # Описываем Виртуальные машины
 MACHINES = {
+
   # Указываем имя ВМ "kernel update"
   "kernel-update" => {
               #Какой vm box будем использовать
               :box_name => "bento/centos-8.4",
+              
               #Указываем box_version
               :box_version => "202110.26.0",
+              
               #Указываем количество ядер ВМ
               :cpus => 2,
+              
               #Указываем количество ОЗУ в мегабайтах
               :memory => 1024,
             }
@@ -15,8 +24,10 @@ MACHINES = {
 
 Vagrant.configure("2") do |config|
   MACHINES.each do |boxname, boxconfig|
+  
     # Отключаем проброс общей папки в ВМ
-    config.vm.synced_folder ".", "/vagrant", disabled: true
+    # config.vm.synced_folder ".", "/vagrant", disabled: true
+    
     # Применяем конфигруацию ВМ
     config.vm.define boxname do |box|
       box.vm.box = boxconfig[:box_name]
