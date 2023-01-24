@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+MACHINES = {
+    :server => {
+        :box_name => "centos/7",
+        :box_version => "2004.01",
+        :vm_name => "server",
+        :memory => 512,
+        :cpus => 2,
+        :net => {ip: "192.168.50.5", virtualbox__intnet: "nfs-net"},
+        :script => "server-up.sh"
+    },
+    :client => {
+        :box_name => "centos/7",
+        :box_version => "2004.01",
+        :vm_name => "client",
+        :memory => 256,
+        :cpus => 1,
+        :net => {ip: "192.168.50.20", virtualbox__intnet: "nfs-net"},
+        :script => "client-up.sh"
+    },
+}
+
+
+Vagrant.configure(2) do |config|
+    MACHINES.each do |boxname, boxconfig|
+
+        # Отключаем проброс общей папки в ВМ
+        config.vm.synced_folder ".", "/vagrant", disabled: true
+
+        # Применяем конфигруацию ВМ
+        config.vm.define boxname do |box|
+
+            box.vm.box = boxconfig[:box_name]
+            box.vm.box_version = boxconfig[:box_version]
+            box.vm.host_name = boxname.to_s
+
+            box.vm.provider "virtualbox" do |v|
+                v.memory = boxconfig[:memory]
+                v.cpus = boxconfig[:cpus]
+            end
+
+            # Сеть
+            box.vm.network "private_network", boxconfig[:net]
+
+            # provision
+            box.vm.provision "shell", path: boxconfig[:script]
+
+        end
+    end
+end
+
